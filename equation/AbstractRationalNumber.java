@@ -350,7 +350,6 @@ double num2 = Equation.toDouble(num); //这里运算的结果与上面相等
 
     /**
      * isGreaterThan方法 - 判断当前对象是否大于传入的Number对象。如果大于，返回true。否则返回false。
-     * <p>它也有对应的Equation方法：<code>compare(Number num1, Number num2): boolean</code>。当num1＞num2时，返回true；当num1≤num2时，返回false。</p>
      * @param num - Number - 需要比较的对象
      * @return boolean - 是否大于
      * @see equation.Equation#compare(Number, Number)
@@ -372,7 +371,6 @@ double num2 = Equation.toDouble(num); //这里运算的结果与上面相等
 
     /**
      * isLessThan方法 - 判断当前对象是否小于传入的Number对象。如果小于，返回true。否则返回false。
-     * <p>它也有对应的Equation方法：<code>compare(Number num1, Number num2): boolean</code>。当num1＜num2时，返回true；当num1≥num2时，返回false。</p>
      * @param num - Number - 需要比较的对象
      * @return boolean - 是否小于
      * @see equation.Equation#compare(Number, Number)
