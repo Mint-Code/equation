@@ -50,7 +50,7 @@ Equation.toFraction(3); // 3/1
      * @return Fraction - 转化后的分数
      */
     public static Fraction toFraction(int num) {
-        return new Fraction(num, 1);
+        return new Fraction(num);
     }
 
     /**

@@ -7,9 +7,11 @@ package equation;
  * <code>simplification(): void</code>（化简）、<code>makeDenominatorChangeTo(int index): void</code>（通分）等。
  * </p>
  * <blockquote><pre>
-AbstractRationalNumber frac = new Fraction(1, 2); //这里表示分数 1/2
-frac.makeDenominatorChangeTo(4); // 2/4
-frac.simplification(); // 1/2
+AbstractRationalNumber frac1 = new Fraction(1, 2); //这里表示分数 1/2
+frac1.makeDenominatorChangeTo(4); // 2/4
+frac1.simplification(); // 1/2
+AbstractRationalNumber frac2 = new Fraction(0.5, 1.5); //自动化简后变成 1/3
+frac2.add(frac1); // 5/6
  * </pre></blockquote>
  * @see equation.Equation
  * @see equation.Fraction
@@ -46,9 +48,14 @@ frac.setDenominator(3); // 1/3
      * @param numerator - int - 分数的分子
      * @param denominator - int - 分数的分母
      * @see equation.AbstractRationalNumber#AbstractRationalNumber(int)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(double)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(double, double)
      */
-    public AbstractRationalNumber(int numerator, int denominator) {
+    public AbstractRationalNumber(int numerator, int denominator) throws UnexpectValueException {
         super();
+        if(denominator == 0) {
+            throw new UnexpectValueException("不能将分母设置为0。");
+        }
         this.numerator = numerator;
         this.denominator = denominator;
     }
@@ -58,8 +65,42 @@ frac.setDenominator(3); // 1/3
      * <p>注意：当不提供分母时，分母默认为1。</p>
      * @param numerator - int - 分数的分子
      * @see equation.AbstractRationalNumber#AbstractRationalNumber(int, int)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(double)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(double, double)
      */
     public AbstractRationalNumber(int numerator) {
+        this(numerator, 1);
+    }
+
+    /**
+     * AbstractRationalNumber - 通过分子和分母创建AbstractRationalNumber对象。
+     * <p>该构造函数会将传入的小数自动化为整数并化简。</p>
+     * @param numerator - double - 分数的分子
+     * @param denominator - double - 分数的分母
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(int, int)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(int)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(double, double)
+     */
+    public AbstractRationalNumber(double numerator, double denominator) throws UnexpectValueException {
+        super();
+        if(denominator == 0) {
+            throw new UnexpectValueException("不能将分母设置为0。");
+        }
+        int index = findIndex(numerator, denominator);
+        this.numerator = (int) (numerator * index);
+        this.denominator  = (int) (denominator * index);
+        simplification();
+    }
+
+    /**
+     * AbstractRationalNumber - 通过分子创建AbstractRationalNumber对象。
+     * <p>首先，该构造函数会将分母初始化为1（当前该分数为 n/1）；接着，该构造函数会将传入的小数自动化为整数并化简。</p>
+     * @param numerator - double - 分数的分子
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(int, int)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(int)
+     * @see equation.AbstractRationalNumber#AbstractRationalNumber(double, double)
+     */
+    public AbstractRationalNumber(double numerator) {
         this(numerator, 1);
     }
 
@@ -71,8 +112,10 @@ AbstractRationalNumber frac = new Fraction(1, 2); // 1/2
 int index = frac.getNumerator(); // 1
 frac.setNumerator(3); // 3/2
      * </pre></blockquote>
+     * @return int - 分数的分子
      * @see equation.AbstractRationalNumber#numerator
-     * @see equation.AbstractRationalNumber#setNumerator()
+     * @see equation.AbstractRationalNumber#setNumerator(int)
+     * @see equation.AbstractRationalNumber#setNumerator(double)
      */
     public int getNumerator() {
         return numerator;
@@ -86,11 +129,33 @@ AbstractRationalNumber frac = new Fraction(1, 2); // 1/2
 int index = frac.getNumerator(); // 1
 frac.setNumerator(3); // 3/2
      * </pre></blockquote>
+     * @param index - int - 分数的分子
      * @see equation.AbstractRationalNumber#numerator
+     * @see equation.AbstractRationalNumber#setNumerator(double)
      * @see equation.AbstractRationalNumber#getNumerator()
      */
     public void setNumerator(int index) {
         numerator = index;
+    }
+
+    /**
+     * setNumerator方法 - 设置分数的分子。
+     * <p>注意，当传入的参数是小数时，会自动将小数化为整数并化简整个分数。</p>
+     * <blockquote><pre>
+AbstractRationalNumber frac = new Fraction(1, 2); // 1/2
+int index = frac.getNumerator(); // 1
+frac.setNumerator(0.5); // 1/4
+     * </pre></blockquote>
+     * @param index - double - 分数的分子
+     * @see equation.AbstractRationalNumber#numerator
+     * @see equation.AbstractRationalNumber#setNumerator(int)
+     * @see equation.AbstractRationalNumber#getNumerator()
+     */
+    public void setNumerator(double index) {
+        int i = findIndex(index, denominator);
+        numerator = (int) (index * i);
+        denominator = denominator * i;
+        simplification();
     }
 
     /**
@@ -101,8 +166,10 @@ AbstractRationalNumber frac = new Fraction(1, 2); // 1/2
 int index = frac.getDenominator(); // 2
 frac.setDenominator(3); // 1/3
      * </pre></blockquote>
+     * @return int - 分数的分母
      * @see equation.AbstractRationalNumber#numerator
-     * @see equation.AbstractRationalNumber#setDenominator()
+     * @see equation.AbstractRationalNumber#setDenominator(int)
+     * @see equation.AbstractRationalNumber#setDenominator(double)
      */
     public int getDenominator() {
         return denominator;
@@ -116,57 +183,73 @@ AbstractRationalNumber frac = new Fraction(1, 2); // 1/2
 int index = frac.getDenominator(); // 2
 frac.setDenominator(3); // 1/3
      * </pre></blockquote>
+     * @param index - int - 分数的分母
      * @see equation.AbstractRationalNumber#numerator
+     * @see equation.AbstractRationalNumber#setDenominator(double)
      * @see equation.AbstractRationalNumber#getDenominator()
      */
     public void setDenominator(int index) {
         denominator = index;
     }
+        
+    /**
+     * setDenominator方法 - 设置分数的分母。
+     * <p>注意，当传入的参数是小数时，会自动将小数化为整数并化简整个分数。</p>
+     * <blockquote><pre>
+AbstractRationalNumber frac = new Fraction(1, 2); // 1/2
+int index = frac.getDenominator(); // 2
+frac.setDenominator(0.3); // 10/3
+     * </pre></blockquote>
+     * @param index - double - 分数的分母
+     * @see equation.AbstractRationalNumber#numerator
+     * @see equation.AbstractRationalNumber#setDenominator(int)
+     * @see equation.AbstractRationalNumber#getDenominator()
+     */
+    public void setDenominator(double index) {
+        int i = findIndex(numerator, index);
+        numerator = numerator * i;
+        denominator = (int) (index * i);
+        simplification();
+    }
 
     /**
      * makeDenominatorChangeTo方法 - 将分数通分至指定大小。
-     * <p>请注意，传入的index参数是通分后分母的大小，而不是分子的大小。</p>
+     * <p>请注意，传入的index参数是通分后分母的大小，而不是分子的大小。并且，当传入的参数不能使分子化成整数时，会强制通分。</p>
      * <blockquote><pre>
 AbstractRationalNumber frac = new Fraction(1, 2); //这里表示分数 1/2
 frac.makeDenominatorChangeTo(4); // 2/4
      * </pre></blockquote>
-     * <p>如果想要统一分子，请使用<code>makeNumeratorChangeTo(int index): void</code>方法。
+     * <p>如果想要统一分子，请使用<code>makeNumeratorChangeTo(int index): void</code>或<code>makeNumeratorChangeTo(double index): void</code>方法。
      * @param index - int - 通分后分母的大小
-     * @throws UnexpectValueException 当传入的参数不能使分子化成整数时，将会抛出该错误
      * @see equation.AbstractRationalNumber#makeNumeratorChangeTo(int)
      */
-    public void makeDenominatorChangeTo(int index) throws UnexpectValueException {
+    public void makeDenominatorChangeTo(int index) {
         double times = index / denominator;
-        try {
-            int value = (int) (numerator * times);
-            numerator = value;
-            denominator = index;
-        } catch(Exception err) {
-            throw new UnexpectValueException("无法将分子化成整数，请使用传入合适的参数重新尝试。");
-        }
+        double value = numerator * times;
+        int i = findIndex(index, value);
+        numerator = (int) (value * i);
+        denominator = index * i;
+        simplification();
     }
 
     /**
      * makeNumeratorChangeTo方法 - 将分数通分至指定大小。
-     * <p>请注意，传入的index参数是通分后分子的大小，而不是分母的大小。</p>
+     * <p>请注意，传入的index参数是通分后分子的大小，而不是分母的大小。并且，当传入的参数不能使分母化成整数时，会强制通分。</p>
      * <blockquote><pre>
 AbstractRationalNumber frac = new Fraction(1, 2); //这里表示分数 1/2
 frac.makeNumeratorChangeTo(4); // 4/8
      * </pre></blockquote>
      * <p>如果想要统一分母，请使用<code>makeDenominatorChangeTo(int index): void</code>方法。
      * @param index - int - 通分后分母的大小
-     * @throws UnexpectValueException 当传入的参数不能使分母化成整数时，将会抛出该错误
      * @see equation.AbstractRationalNumber#makeDenominatorChangeTo(int)
      */
-    public void makeNumeratorChangeTo(int index) throws UnexpectValueException {
+    public void makeNumeratorChangeTo(int index) {
         double times = index / numerator;
-        try {
-            int value = (int) (denominator * times);
-            denominator = value;
-            numerator = index;
-        } catch(Exception err) {
-            throw new UnexpectValueException("无法将分母化成整数，请使用传入合适的参数重新尝试。");
-        }
+        double value = denominator * times;
+        int i = findIndex(index, value);
+        denominator = (int) (value * i);
+        numerator = index * i;
+        simplification();
     }
 
     /**
@@ -388,5 +471,23 @@ double num2 = Equation.toDouble(num); //这里运算的结果与上面相等
             return true;
         }
         return false;
+    }
+
+    /**
+     * findIndex方法 - 找到能让两个小数都变成整数的因数（index）。
+     * <p>该方法永远返回一个大小为10^n的数。例如，传入的两个数为0.5和0.05，则会返回100。</p>
+     * @param num1 - double - 第一个小数
+     * @param num2 - double - 第二个小数
+     * @return int - 能够使两个小数都变为整数的最小的能写成10^n形式的数
+     */
+    protected int findIndex(double num1, double num2) {
+        int index1 = Double.toString(num1).length() - (Double.toString(num1).indexOf(".") + 1);
+        int index2 = Double.toString(num2).length() - (Double.toString(num2).indexOf(".") + 1);
+        int comp = index1 >= index2 ? index1 : index2;
+        int index = 1;
+        for(int i = 0; i < comp; i++) {
+            index *= 10;
+        }
+        return index;
     }
 }
